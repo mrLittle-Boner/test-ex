@@ -1,1 +1,16 @@
+.pag__list {
+  list-style-type: none;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
 
+.pag__link {
+  text-decoration: none;
+  padding: 3px 10px;
+  display: flex;
+  align-items: center;
+  border: 1px solid goldenrod;
+}
