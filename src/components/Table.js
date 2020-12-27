@@ -9,54 +9,53 @@ export default function Table() {
   const [isLoading, setIsLoading] = useState(true);
   const [userInfo, setuserInfo] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const userPerPage = 5;
-
-  // const [sortedType, setSortedType] = useState({
-  //   id: true,
-  //   name: true,
-  //   phone: true,
-  //   email: true
-  // });
+  const [showingUsers, setShowingUsers] = useState([]);
+  const userPerPage = 50;
 
   useEffect(() => {
-    fetch('https://jsonplaceholder.typicode.com/users')
+    fetch('http://www.filltext.com/?rows=32&id={number|1000}&firstName={firstName}&lastName={lastName}&email={email}&phone={phone|(xxx)xxx-xx-xx}&address={addressObject}&description={lorem|32}')
       .then(resp => resp.json())
       .then(data => setUsers(data))
       .catch(err => console.log('The Error is : ' + err));
 
     setIsLoading(false);
+
   }, []);
 
+  useEffect(() => {
+    const indexOfLastUser = currentPage * userPerPage;
+    const indexOfFirstUser = indexOfLastUser - userPerPage;
+    let showUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+
+    setShowingUsers(showUsers)
+  }, [users, currentPage])
+
+  const [isSortedType, setIsSortedType] = useState({
+    id: true,
+    firstName: true,
+    lastName: true,
+    phone: true,
+    email: true
+  });
 
   function getValueAndSort(value) {
-    // let sortType = sortedType[value];
-    // let copiedArray = users.slice();
-    // let sorteredUsers = [];
-    // let newObjext = Object.assign({}, sortedType);
+    let sortedUsers = [];
+    let newObjext = Object.assign({}, isSortedType);
 
-    // sortType
-    //   ? sorteredUsers = copiedArray.sort((a, b) => a[value] > b[value] ? 1 : -1)
-    //   : sorteredUsers = copiedArray.sort((a, b) => a[value] < b[value] ? 1 : -1)
+    isSortedType[value]
+      ? sortedUsers = showingUsers.sort((a, b) => a[value] > b[value] ? 1 : -1)
+      : sortedUsers = showingUsers.sort((a, b) => a[value] < b[value] ? 1 : -1)
 
-    // for (let key in newObjext) {
-    //   if (newObjext[key])
-    //     newObjext[key] = !value
-    // }
+    newObjext[value] = !isSortedType[value];
 
-    // let updatedValues = Object.assign()
-    // setUsers(sorteredUsers);
-    // setSortedType();
-    // console.log(newObjext);
+    setIsSortedType(newObjext);
+    setShowingUsers(sortedUsers);
   }
 
   function showUserInfo(id) {
     let searchebleUser = users.find(user => user.id === id);
     setuserInfo(searchebleUser);
   }
-
-  const indexOfLastUser = currentPage * userPerPage;
-  const indexOfFirstUser = indexOfLastUser - userPerPage;
-  const showingUsers = users.slice(indexOfFirstUser, indexOfLastUser);
 
   function paginateUsers(pageNumber) {
     setCurrentPage(pageNumber);
@@ -67,6 +66,7 @@ export default function Table() {
       <table className='table table-bordered table-hover'>
         <TableHead
           handleClick={getValueAndSort}
+          isSortedType={isSortedType}
         />
         <tbody>
           {
@@ -75,8 +75,8 @@ export default function Table() {
                 <TableRow
                   key={user.id.toString()}
                   id={user.id}
-                  name={user.name}
-                  website={user.website}
+                  firstName={user.firstName}
+                  lastName={user.lastName}
                   email={user.email}
                   phone={user.phone}
                   clickEvent={showUserInfo}
@@ -86,14 +86,14 @@ export default function Table() {
         </tbody>
       </table>
 
-      <Pagination pages={users.length / userPerPage} handleClick={paginateUsers} />
+      <Pagination pages={Math.ceil(users.length / userPerPage)} handleClick={paginateUsers} />
 
       {isLoading && <div>Loading data</div>}
 
       {userInfo &&
         <UserInfo
-          name={userInfo.name}
-          catchPhrase={userInfo.company.catchPhrase}
+          firstName={userInfo.firstName}
+          description={userInfo.description}
           address={userInfo.address}
         />}
     </>
