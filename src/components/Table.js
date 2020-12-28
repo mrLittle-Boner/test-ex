@@ -3,6 +3,9 @@ import TableHead from './TableHead.js';
 import TableRow from './TableRow.js';
 import UserInfo from './UserInfo.js';
 import Pagination from './Pagination.js';
+import Loader from './Loader.js';
+import Filter from './Filter.js';
+import AddRow from './AddRow.js';
 
 export default function Table() {
   const [users, setUsers] = useState([]);
@@ -10,26 +13,7 @@ export default function Table() {
   const [userInfo, setuserInfo] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [showingUsers, setShowingUsers] = useState([]);
-  const userPerPage = 50;
-
-  useEffect(() => {
-    fetch('http://www.filltext.com/?rows=32&id={number|1000}&firstName={firstName}&lastName={lastName}&email={email}&phone={phone|(xxx)xxx-xx-xx}&address={addressObject}&description={lorem|32}')
-      .then(resp => resp.json())
-      .then(data => setUsers(data))
-      .catch(err => console.log('The Error is : ' + err));
-
-    setIsLoading(false);
-
-  }, []);
-
-  useEffect(() => {
-    const indexOfLastUser = currentPage * userPerPage;
-    const indexOfFirstUser = indexOfLastUser - userPerPage;
-    let showUsers = users.slice(indexOfFirstUser, indexOfLastUser);
-
-    setShowingUsers(showUsers)
-  }, [users, currentPage])
-
+  const userPerPage = 10;
   const [isSortedType, setIsSortedType] = useState({
     id: true,
     firstName: true,
@@ -37,6 +21,32 @@ export default function Table() {
     phone: true,
     email: true
   });
+
+  //Handling Form
+  const [idValue, setIdValue] = useState('');
+  const [firsNameValue, setFirsNameValue] = useState('');
+  const [lastNameValue, setLastNameValue] = useState('');
+  const [emailValue, setEmailValue] = useState('');
+  const [phoneValue, setPhoneValue] = useState('');
+  //Handling Form
+
+
+  useEffect(() => {
+    fetch('http://www.filltext.com/?rows=32&id={number|1000}&firstName={firstName}&lastName={lastName}&email={email}&phone={phone|(xxx)xxx-xx-xx}&address={addressObject}&description={lorem|32}')
+      .then(resp => resp.json())
+      .then(data => setUsers(data))
+      .catch(err => console.log('The Error is : ' + err));
+  }, []);
+
+  useEffect(() => {
+    const indexOfLastUser = currentPage * userPerPage;
+    const indexOfFirstUser = indexOfLastUser - userPerPage;
+    let showUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+
+    setShowingUsers(showUsers);
+    setIsLoading(false);
+
+  }, [users, currentPage])
 
   function getValueAndSort(value) {
     let sortedUsers = [];
@@ -61,8 +71,48 @@ export default function Table() {
     setCurrentPage(pageNumber);
   }
 
+  function filterRows(e, text) {
+    e.preventDefault();
+    const filteredArr = users.filter(function (user) {
+      let re = new RegExp(text, 'ig');
+      for (let key in user) {
+        if (re.test(user[key])) return user
+      }
+      return user
+    })
+    setShowingUsers(filteredArr);
+  }
+
+  function showMeMagick(e) {
+    e.preventDefault();
+    let newRow = [{
+      id: idValue,
+      firstName: firsNameValue,
+      lastName: lastNameValue,
+      email: emailValue,
+      phone: phoneValue
+    }]
+    let withNewUser = [...newRow, ...users];
+    setUsers(withNewUser);
+    // console.log(withNewUser)
+  }
+
   return (
     <>
+      <Filter handleSubmit={filterRows} />
+      <AddRow
+        idValue={idValue}
+        changeId={setIdValue}
+        firsNameValue={firsNameValue}
+        changeFName={setFirsNameValue}
+        lastNameValue={lastNameValue}
+        changeLName={setLastNameValue}
+        emailValue={emailValue}
+        changeEmail={setEmailValue}
+        phoneValue={phoneValue}
+        changePhone={setPhoneValue}
+        showMeMagick={showMeMagick}
+      />
       <table className='table table-bordered table-hover'>
         <TableHead
           handleClick={getValueAndSort}
@@ -88,7 +138,7 @@ export default function Table() {
 
       <Pagination pages={Math.ceil(users.length / userPerPage)} handleClick={paginateUsers} />
 
-      {isLoading && <div>Loading data</div>}
+      {isLoading && <Loader />}
 
       {userInfo &&
         <UserInfo

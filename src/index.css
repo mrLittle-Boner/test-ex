@@ -22,3 +22,15 @@ body {
 ul {
   padding-left: 0;
 }
+
+th {
+  cursor: pointer;
+}
+
+label {
+  /* display: flex; */
+}
+
+.dropdown__inputs {
+  display: grid;
+}
