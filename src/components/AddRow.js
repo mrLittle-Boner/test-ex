@@ -13,33 +13,33 @@ export default function AddRow(props) {
   }
 
   return (
-    <div className='dropdown'>
-      <button onClick={showHideForm}>Add a new Row to the table(Show/Hide Form)</button>
+    <div className='dropdown mb-3'>
+      <button onClick={showHideForm} className='px-3 py-2 w-100'>Add a new Row to the table(Show/Hide Form)</button>
 
-      {showForm && <form className='dropdown__form' onSubmit={(e) => props.showMeMagick(e)}>
-        <div className='dropdown__inuts'>
+      {showForm && <form className='text-center dropdown__form mt-3 p-1 border border-dark' onSubmit={(e) => props.showMeMagick(e)}>
+        <div className='dropdown__inputs mb-3'>
           <label>
-            <div>id</div>
-            <input type='number' value={props.idValue} onChange={e => props.changeId(e.target.value)} />
+            <div className=''>id</div>
+            <input className='w-100' type='number' value={props.idValue} onChange={e => props.changeId(e.target.value)} />
           </label>
           <label>
-            <div>firstName</div>
-            <input type='text' value={props.firsNameValue} onChange={e => props.changeFName(e.target.value)} />
+            <div className=''>firstName</div>
+            <input className='w-100' type='text' value={props.firsNameValue} onChange={e => props.changeFName(e.target.value)} />
           </label>
           <label>
-            <div>lastName</div>
-            <input type='text' value={props.lastNameValue} onChange={e => props.changeLName(e.target.value)} />
+            <div className=''>lastName</div>
+            <input className='w-100' type='text' value={props.lastNameValue} onChange={e => props.changeLName(e.target.value)} />
           </label>
           <label>
-            <div>email</div>
-            <input type='email' value={props.emailValue} onChange={e => props.changeEmail(e.target.value)} />
+            <div className=''>email</div>
+            <input className='w-100' type='email' value={props.emailValue} onChange={e => props.changeEmail(e.target.value)} />
           </label>
           <label>
-            <div>phone</div>
-            <input type='tel' value={props.phoneValue} onChange={e => props.changePhone(e.target.value)} />
+            <div className=''>phone</div>
+            <input className='w-100' type='tel' value={props.phoneValue} onChange={e => props.changePhone(e.target.value)} />
           </label>
         </div>
-        <button type='submit' className='dropdown__button--add' disabled={isDisabled}>Add row</button>
+        <button type='submit' className='dropdown__button--add py-2 w-25' disabled={isDisabled}>Add row</button>
       </form>}
     </div>
   )

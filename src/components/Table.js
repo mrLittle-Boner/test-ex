@@ -6,6 +6,7 @@ import Pagination from './Pagination.js';
 import Loader from './Loader.js';
 import Filter from './Filter.js';
 import AddRow from './AddRow.js';
+import DataSizeButtons from './DataSizeButtons.js';
 
 export default function Table() {
   const [users, setUsers] = useState([]);
@@ -21,6 +22,8 @@ export default function Table() {
     phone: true,
     email: true
   });
+  const [isFilter, setIsFilter] = useState(false);
+  const [isBigDataLoading, setIsBigDataLoading] = useState(false);
 
   //Handling Form
   const [idValue, setIdValue] = useState('');
@@ -32,21 +35,36 @@ export default function Table() {
 
 
   useEffect(() => {
-    fetch('http://www.filltext.com/?rows=32&id={number|1000}&firstName={firstName}&lastName={lastName}&email={email}&phone={phone|(xxx)xxx-xx-xx}&address={addressObject}&description={lorem|32}')
+    setIsLoading(true);
+    let dataSize = '';
+
+    isBigDataLoading
+      ? dataSize = 'http://www.filltext.com/?rows=1000&id={number|1000}&firstName={firstName}&delay=3&lastName={lastName}&email={email}&phone={phone|(xxx)xxx-xx-xx}&address={addressObject}&description={lorem|32}'
+      : dataSize = 'http://www.filltext.com/?rows=32&id={number|1000}&firstName={firstName}&lastName={lastName}&email={email}&phone={phone|(xxx)xxx-xx-xx}&address={addressObject}&description={lorem|32}';
+
+    fetch(dataSize)
       .then(resp => resp.json())
-      .then(data => setUsers(data))
+      .then(data => {
+        setUsers(data);
+        setIsLoading(false);
+      })
       .catch(err => console.log('The Error is : ' + err));
-  }, []);
+  }, [isBigDataLoading]);
+
 
   useEffect(() => {
     const indexOfLastUser = currentPage * userPerPage;
     const indexOfFirstUser = indexOfLastUser - userPerPage;
-    let showUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+    let showUsers = [];
 
+    if (!isFilter) {
+      showUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+    } else {
+      showUsers = showingUsers.slice(indexOfFirstUser, indexOfLastUser);
+    }
+    // let showUsers = users.slice(indexOfFirstUser, indexOfLastUser);
     setShowingUsers(showUsers);
-    setIsLoading(false);
-
-  }, [users, currentPage])
+  }, [users, currentPage, isFilter]);
 
   function getValueAndSort(value) {
     let sortedUsers = [];
@@ -67,34 +85,56 @@ export default function Table() {
     setuserInfo(searchebleUser);
   }
 
-  function paginateUsers(pageNumber) {
+  function paginateUsers(e, pageNumber) {
     setCurrentPage(pageNumber);
   }
 
   function filterRows(e, text) {
     e.preventDefault();
-    const filteredArr = users.filter(function (user) {
-      let re = new RegExp(text, 'ig');
-      for (let key in user) {
-        if (re.test(user[key])) return user
+    let re = new RegExp(text, 'ig');
+    // eslint-disable-next-line
+    let filteredArrayUsers = users.filter(user => {
+      for (const prop in user) {
+        if (prop !== 'description' && re.test(user[prop])) {
+          return user
+        }
       }
-      return user
-    })
-    setShowingUsers(filteredArr);
+    });
+    console.log(filteredArrayUsers, users);
+    setIsFilter(!isFilter);
+    setShowingUsers(filteredArrayUsers);
+  }
+
+  function clearForm() {
+    setIdValue('');
+    setFirsNameValue('');
+    setLastNameValue('');
+    setEmailValue('');
+    setPhoneValue('');
   }
 
   function showMeMagick(e) {
     e.preventDefault();
+
     let newRow = [{
       id: idValue,
       firstName: firsNameValue,
       lastName: lastNameValue,
       email: emailValue,
-      phone: phoneValue
-    }]
+      phone: phoneValue,
+      description: "Not specified",
+      address: {
+        city: 'Not specified',
+        zip: 'Not specified',
+        streetAddress: 'Not specified',
+        state: 'Not specified'
+      }
+    }];
+
     let withNewUser = [...newRow, ...users];
+
     setUsers(withNewUser);
-    // console.log(withNewUser)
+    clearForm();
   }
 
   return (
@@ -113,7 +153,9 @@ export default function Table() {
         changePhone={setPhoneValue}
         showMeMagick={showMeMagick}
       />
-      <table className='table table-bordered table-hover'>
+      <DataSizeButtons handleClick={setIsBigDataLoading} />
+      {isLoading && <Loader />}
+      <table className='table table-bordered border-white table-hover'>
         <TableHead
           handleClick={getValueAndSort}
           isSortedType={isSortedType}
@@ -136,9 +178,7 @@ export default function Table() {
         </tbody>
       </table>
 
-      <Pagination pages={Math.ceil(users.length / userPerPage)} handleClick={paginateUsers} />
-
-      {isLoading && <Loader />}
+      <Pagination pages={Math.ceil(users.length / userPerPage)} currentPage={currentPage} handleClick={paginateUsers} />
 
       {userInfo &&
         <UserInfo
