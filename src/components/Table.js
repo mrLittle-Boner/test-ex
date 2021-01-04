@@ -43,12 +43,14 @@ export default function Table() {
       : dataSize = 'http://www.filltext.com/?rows=32&id={number|1000}&firstName={firstName}&lastName={lastName}&email={email}&phone={phone|(xxx)xxx-xx-xx}&address={addressObject}&description={lorem|32}';
 
     fetch(dataSize)
-      .then(resp => resp.json())
+      .then(resp =>
+        resp.json()
+      )
       .then(data => {
         setUsers(data);
         setIsLoading(false);
       })
-      .catch(err => console.log('The Error is : ' + err));
+      .catch(err => alert('Error ' + err));
   }, [isBigDataLoading]);
 
 
@@ -62,7 +64,6 @@ export default function Table() {
     } else {
       showUsers = showingUsers.slice(indexOfFirstUser, indexOfLastUser);
     }
-    // let showUsers = users.slice(indexOfFirstUser, indexOfLastUser);
     setShowingUsers(showUsers);
   }, [users, currentPage, isFilter]);
 
@@ -100,7 +101,6 @@ export default function Table() {
         }
       }
     });
-    console.log(filteredArrayUsers, users);
     setIsFilter(!isFilter);
     setShowingUsers(filteredArrayUsers);
   }
@@ -136,6 +136,11 @@ export default function Table() {
     setUsers(withNewUser);
     clearForm();
   }
+
+  let pages = 0;
+  isFilter
+    ? pages = Math.ceil(showingUsers.length / userPerPage)
+    : pages = Math.ceil(users.length / userPerPage)
 
   return (
     <>
@@ -178,7 +183,7 @@ export default function Table() {
         </tbody>
       </table>
 
-      <Pagination pages={Math.ceil(users.length / userPerPage)} currentPage={currentPage} handleClick={paginateUsers} />
+      <Pagination pages={pages} currentPage={currentPage} handleClick={paginateUsers} />
 
       {userInfo &&
         <UserInfo
